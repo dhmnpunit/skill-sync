@@ -12,7 +12,7 @@ const Hero = () => {
         <div className='flex gap-4'>
             {/* student login button */}
             <Link to="/auth/student-signup">
-              <button className='py-4 px-6 bg-[#015FFE] text-white rounded-xl hover:bg-[#0143B4]'>Student Login</button>
+              <button className='py-4 px-6 bg-[#015FFE] text-white rounded-xl border border-primary hover:bg-[#0143B4]'>Student Login</button>
             </Link>
             {/* company login button */}
             <Link to="/auth/company-signup">

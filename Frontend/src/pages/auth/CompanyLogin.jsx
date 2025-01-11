@@ -1,8 +1,90 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Building2, GraduationCap } from 'lucide-react'
 
+import useAuthStore from '../../store/authStore'
+
+import toast from 'react-hot-toast'
+
 const CompanyLogin = () => {
+    // Initialize navigation function from react-router
+    const navigate = useNavigate();
+
+    // Get required functions and states from auth store
+    // Using selective state picking to prevent re-render issues
+    const companyLogin = useAuthStore(state => state.companyLogin);
+    const isLoading = useAuthStore(state => state.isLoading);
+    const error = useAuthStore(state => state.error);
+
+    // Initialize form state with empty email and password
+    const [formData, setFormData] = useState({
+        companyEmail: "",
+        password: "",
+    });
+
+    // Handle input changes for form fields
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        // Update form state while preserving other field values
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    // Validate form inputs before submission
+    const validateForm = () => {
+        // Regular expression for email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+        // Check if all fields are filled
+        if (!formData.companyEmail || !formData.password) {
+            toast.error("Please fill all fields")
+            return false
+        }
+        // Validate email format
+        if (!emailRegex.test(formData.companyEmail)) {
+            toast.error("Invalid email address")
+            return false
+        }
+        return true
+    }
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        // Prevent default form submission
+        e.preventDefault()
+        // Validate form before proceeding
+        if (!validateForm()) {
+            return;
+        }
+        
+        try {
+            // Log login attempt details in development
+            console.log('Attempting login with:', {
+                url: `${import.meta.env.MODE === "development" ? "http://localhost:5005/api/auth" : "/api/auth"}/company-login`,
+                email: formData.companyEmail
+            });
+            
+            // Attempt login with provided credentials
+            await companyLogin(formData.companyEmail, formData.password)
+            // Show success message
+            toast.success("Login successful")
+            // Navigate to dashboard on success
+            navigate("/dashboard")
+        } catch (error) {
+            // Log detailed error information for debugging
+            console.error('Login error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                url: error.config?.url,
+                message: error.message
+            });
+            // Show error message to user
+            toast.error(error.response?.data?.message || "Error logging in")
+        }
+    }
+
     return (
         <div className='p-3 bg-[#EFF6FF] flex h-screen w-screen'>
             {/* left side */}
@@ -54,7 +136,13 @@ const CompanyLogin = () => {
                     </div>
     
                     {/* student login form */}
-                    <form className='mt-8 flex flex-col gap-4'> 
+                    <form 
+                        onSubmit={handleSubmit}
+                        className='mt-8 flex flex-col gap-4'
+                    > 
+                        {error && (
+                            <div className="text-red-500 text-sm">{error}</div>
+                        )}
     
                         {/* email */}
                         <div>
@@ -62,6 +150,9 @@ const CompanyLogin = () => {
                                 <span className="text-sm text-gray-600">Email</span>
                                 <input 
                                     type="email" 
+                                    name='companyEmail'
+                                    value={formData.companyEmail}
+                                    onChange={handleInputChange}
                                     className="px-4 py-2 rounded-xl border border-[#BCC3D0] w-[476px]"
                                     placeholder="johndoe@example.com"
                                     />
@@ -73,15 +164,30 @@ const CompanyLogin = () => {
                             <div className="flex flex-col gap-1">
                                 <span className="text-sm text-gray-600">Password</span>
                                 <input 
-                                    type="email" 
+                                    type="password" 
+                                    name='password'
+                                    value={formData.password}
+                                    onChange={handleInputChange}
                                     className="px-4 py-2 rounded-xl border border-[#BCC3D0] w-[476px]"
                                     placeholder="••••••••"
                                     />
                             </div>
                         </div>
     
-                        <button className="w-[476px] bg-[#1F479A] rounded-xl py-2.5 text-white mt-4">
-                            Sign In
+                        <button 
+                            type='submit'
+                            disabled={isLoading}
+                            className="w-[476px] bg-[#1F479A] rounded-xl py-2.5 text-white mt-4"
+                        >
+                            {isLoading ? (
+                                // Loading spinner and text
+                                <div className="flex justify-center items-center gap-2">
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                                    Signing In...
+                                </div>
+                            ) : (
+                                "Sign In"
+                            )}
                         </button>
     
                     </form>

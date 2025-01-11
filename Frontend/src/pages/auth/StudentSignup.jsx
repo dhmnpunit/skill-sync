@@ -258,6 +258,7 @@ const StudentSignup = () => {
                         />
                     </div>
                 </div>
+                
 
                 <button className="w-[476px] bg-primary rounded-xl py-2.5 text-white mt-4">
                     Sign Up

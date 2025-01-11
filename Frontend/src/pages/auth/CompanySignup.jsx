@@ -15,7 +15,7 @@ const CompanySignup = () => {
     const [passwordFeedback, setPasswordFeedback] = useState('');
 
     const [formData, setFormData] = useState({
-        // step 1
+        // step 1 
         companyName: '',
         companyPhoneNumber: '',
         companyEmail: '',

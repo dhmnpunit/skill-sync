@@ -26,9 +26,8 @@ const companySchema = new mongoose.Schema({
     confirmPassword: {
         type: String,
         required: true,
-        minlength: 6,
-    },
-
+        },
+    
     industryType: {
         type: String,
         required: true,
@@ -105,8 +104,12 @@ const companySchema = new mongoose.Schema({
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
-    verificationToken: String,
+    verificationToken: {
+        type: String,
+        index: true
+    },
     verificationTokenExpire: Date
+    
 }, {
     timestamps: true
 });
